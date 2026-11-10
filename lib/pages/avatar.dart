@@ -10,7 +10,6 @@ import '../data/repositories/pet_repository.dart';
 import "package:cached_network_image/cached_network_image.dart";
 import '../data/repositories/quote_repository.dart';
 import '../theme/app_theme.dart';
-import '../data/models/user_pet_progress.dart';
 import '../services/language_notifier.dart';
 
 class AvatarPage extends StatefulWidget {
@@ -332,7 +331,6 @@ class _AvatarPageState extends State<AvatarPage>
         final petProgress = user.ownedPets[user.equippedPetId];
         final petName = pet?.name ?? lang.t('no_pet');
         final petRarity = pet?.rarity ?? lang.t('common');
-        final duplicateCount = petProgress?.duplicateCount ?? 0;
         final equippedSkin = petProgress?.equippedSkinKey ?? '';
         final themeKey = context.colors.petImageKey;
         final imageUrl = equippedSkin.isNotEmpty

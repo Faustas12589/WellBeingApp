@@ -14,7 +14,7 @@
     </queries>
 
     <application
-        android:label="pvp"
+        android:label="Well-Being"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

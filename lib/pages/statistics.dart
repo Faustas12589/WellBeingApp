@@ -6,7 +6,6 @@ import 'package:fl_chart/fl_chart.dart';
 import '../data/repositories/user_repository.dart';
 import '../features/habits/data/HabitRepository.dart';
 import '../features/habits/models/models.dart';
-import '../widgets/month_chart_strip.dart';
 import '../data/repositories/diary_repository.dart';
 import '../data/models/diary_entry_model.dart';
 import '../widgets/best_month_card.dart';
@@ -45,11 +44,11 @@ class StatisticsPage extends StatefulWidget {
   State<StatisticsPage> createState() => _StatisticsPageState();
 }
 
-// FIX 1: Add SingleTickerProviderStateMixin for explicit TabController
+// Add SingleTickerProviderStateMixin for explicit TabController
 class _StatisticsPageState extends State<StatisticsPage>
     with SingleTickerProviderStateMixin {
   bool _isPremium = false;
-  // FIX 2: Explicit TabController so tab position is preserved on month change
+  // Explicit TabController so tab position is preserved on month change
   late TabController _tabController;
 
   _MonthStats? _computeBestMonth() {
@@ -125,7 +124,7 @@ class _StatisticsPageState extends State<StatisticsPage>
   final DiaryRepository _diaryRepo = DiaryRepository();
 
   bool _loading = true;
-  // FIX 3: Separate flag so only the very first load shows a full-page spinner
+  // Separate flag so only the very first load shows a full-page spinner
   bool _initialLoad = true;
   bool _historyLoaded = false;
   List<Habit> _habits = [];
@@ -135,7 +134,7 @@ class _StatisticsPageState extends State<StatisticsPage>
   @override
   void initState() {
     super.initState();
-    // FIX 2: init TabController here
+    // init TabController here
     _tabController = TabController(length: 2, vsync: this);
     _loadMonth();
   }
@@ -192,13 +191,15 @@ class _StatisticsPageState extends State<StatisticsPage>
         viewEnd,
       );
 
+      if (!mounted) return;
       setState(() {
         _diaryEntries = diaryEntries;
         _loading = false;
         _initialLoad = false;
       });
     } catch (e) {
-      print('Error loading: $e');
+      debugPrint('Error loading statistics: $e');
+      if (!mounted) return;
       setState(() {
         _loading = false;
         _initialLoad = false;
@@ -206,7 +207,7 @@ class _StatisticsPageState extends State<StatisticsPage>
     }
   }
 
-  // FIX 4: Helper to check if we're already on the current month
+  // Helper to check if we're already on the current month
   bool _isCurrentMonth() {
     final now = DateTime.now();
     return _currentMonth.year == now.year && _currentMonth.month == now.month;
@@ -219,7 +220,7 @@ class _StatisticsPageState extends State<StatisticsPage>
     _loadMonth();
   }
 
-  // FIX 5: Guard _nextMonth so it can't go past the current month
+  // Guard _nextMonth so it can't go past the current month
   void _nextMonth() {
     if (_isCurrentMonth()) return;
     setState(() {
@@ -276,33 +277,6 @@ class _StatisticsPageState extends State<StatisticsPage>
   // HABIT COMPLETION CALCULATION
   // ---------------------------------------------------------------------------
 
-  Map<DateTime, List<double>> _buildMonthChartData() {
-    final map = <DateTime, List<double>>{};
-    final now = DateTime.now();
-
-    // Sliding 12-month window to match MonthChartStrip
-    for (int i = 0; i < 12; i++) {
-      final month = DateTime(now.year, now.month - (11 - i), 1);
-      final weeks = <double>[];
-
-      for (int w = 0; w < 4; w++) {
-        final startDay = w * 7 + 1;
-        final values = <double>[];
-
-        for (int d = startDay; d < startDay + 7; d++) {
-          final date = DateTime(month.year, month.month, d);
-          if (date.month != month.month) continue;
-          values.add(_completionRatioForDay(date));
-        }
-
-        weeks.add(values.isEmpty ? 0.0 : values.reduce((a, b) => a + b) / values.length);
-      }
-      map[DateTime(month.year, month.month)] = weeks;
-    }
-
-    return map;
-  }
-
   double _completionRatioForDay(DateTime day) {
     if (_habits.isEmpty) return 0;
 
@@ -333,7 +307,7 @@ class _StatisticsPageState extends State<StatisticsPage>
     final colors = context.colors;
     final lang = context.watch<LanguageNotifier>();
 
-    // FIX 3: Only show full-page spinner on the very first load
+    // Only show full-page spinner on the very first load
     if (_initialLoad) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
@@ -346,7 +320,7 @@ class _StatisticsPageState extends State<StatisticsPage>
     final totalCells = daysInMonth + (firstWeekday - 1);
 
     return Scaffold(
-      // FIX 2: Pass explicit _tabController so switching months doesn't reset the tab
+      // Pass explicit _tabController so switching months doesn't reset the tab
       appBar: CustomAppBar(
         title: lang.t('statistics'),
         bottom: TabBar(
@@ -360,7 +334,7 @@ class _StatisticsPageState extends State<StatisticsPage>
           ],
         ),
       ),
-      // FIX 3: Show a thin progress bar during subsequent loads instead of a full spinner
+      // Show a thin progress bar during subsequent loads instead of a full spinner
       body: Stack(
         children: [
           TabBarView(
@@ -440,7 +414,7 @@ class _StatisticsPageState extends State<StatisticsPage>
 
           const SizedBox(height: 8),
 
-          // FIX 5: Month nav row with disabled right chevron on current month
+          // Month nav row with disabled right chevron on current month
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(

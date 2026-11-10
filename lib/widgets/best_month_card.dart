@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:provider/provider.dart';
-import '../theme/app_theme.dart';
 import '../services/language_notifier.dart';
 
 class BestMonthCard extends StatefulWidget {

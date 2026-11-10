@@ -45,7 +45,7 @@ class NewEntryTab extends StatelessWidget {
         RewardService().checkLevelUp(userId: provider.userId, oldLevel: oldLvl, newLevel: newLvl, notifier: context.read<RewardNotifier>());
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Gavai +20 XP!", style: TextStyle(fontWeight: FontWeight.bold))));
       }
-      DefaultTabController.of(context)?.animateTo(1);
+      DefaultTabController.of(context).animateTo(1);
     } catch (e) {
       if (!context.mounted) return;
       Navigator.pop(context);

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:pvp/pages/avatar.dart';
-import 'package:pvp/pages/minigames.dart';
+import 'package:well_being_app/pages/avatar.dart';
+import 'package:well_being_app/pages/minigames.dart';
 import '../widgets/custom_app_bar.dart';
 import '../theme/app_theme.dart';
 

@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 import '../data/models/pet_model.dart';
 import '../data/models/user_model.dart';
@@ -290,7 +289,6 @@ class _PetCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final duplicateCount = userPet?.duplicateCount ?? 0;
 
     final imageKey = context.colors.petImageKey;
 
@@ -441,7 +439,6 @@ class _PetDetailSheetState extends State<_PetDetailSheet> {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final duplicateCount = widget.userPet?.duplicateCount ?? 0;
 
     final imageKey = context.colors.petImageKey;
 

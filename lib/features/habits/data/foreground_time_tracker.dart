@@ -55,6 +55,8 @@ class ForegroundTimeTracker with WidgetsBindingObserver {
 
     if (_reachedToday) return;
 
+    // Avoid stacking a second timer if resume fires more than once.
+    _cancelTimer();
     _sessionStart = now();
 
     final remaining = threshold - _accumulatedToday;

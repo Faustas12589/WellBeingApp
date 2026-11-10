@@ -9,7 +9,7 @@ A Flutter + Firebase mobile app for self-improvement: track habits, keep a mood 
 - **Habits and goals**: create habits, log them daily, set goals and track progress toward them. An onboarding questionnaire suggests starter habits.
 - **Diary**: daily entries with mood, guided questions and photos, plus a calendar view, a "memories" tab and a before/after photo comparison.
 - **Statistics**: mood and habit charts over time (fl_chart), including a monthly overview.
-- **Pets and rewards**: earn XP and daily and level-up rewards, unlock and level up pets, collect skins and spend currency in a shop.
+- **Pets and rewards**: earn XP and daily and level-up rewards, unlock and level up pets, and collect skins.
 - **Step tracking**: reads daily steps from Health Connect.
 - **Push notifications**: Firebase Cloud Messaging.
 - **Personalisation**: light and dark themes and Lithuanian/English language, saved per user.
@@ -23,7 +23,7 @@ Flutter (Dart) · Firebase Auth · Cloud Firestore · Firebase Storage · Fireba
 
 ```
 lib/
-  data/        models and Firestore repositories (users, pets, diary, shop, quotes)
+  data/        models and Firestore repositories (users, pets, diary, quotes)
   features/    habits feature (models, repository, dialogs, utils)
   pages/       screens (avatar & collection, statistics, habits, diary, settings, login)
   services/    auth, rewards, notifications, steps, theme, language, sounds
@@ -45,6 +45,14 @@ This was a 4-person university team project. I worked on:
 Team: <!-- TODO: add teammates' GitHub profiles, e.g. [Rokiz12](https://github.com/Rokiz12), [lukkool](https://github.com/lukkool), TautvydasIT -->
 Original repository: <!-- TODO: link it here if it's public, e.g. https://github.com/Rokiz12/Saviugdymo_Programele -->
 
+## Tests
+
+```bash
+flutter test
+```
+
+Unit tests cover the habit models and goal-progress logic (`test/habits/`).
+
 ## Running locally
 
 Firebase config files are not committed. To run the app with your own Firebase project:
@@ -64,4 +72,4 @@ Firebase config files are not committed. To run the app with your own Firebase p
    flutter run
    ```
 
-<!-- TODO: note the Firestore data the app expects to already exist (e.g. `pets`, `shop_items`, `quotes`, `diaryQuestions` collections), or include a seed script. -->
+<!-- TODO: note the Firestore data the app expects to already exist (e.g. `pets`, `quotes`, `diaryQuestions` collections), or include a seed script. -->

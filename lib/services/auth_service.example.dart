@@ -1,6 +1,7 @@
 // Example only. Copy to auth_service.dart and set serverClientId to the
 // Web client ID from Firebase Console > Authentication > Sign-in method > Google.
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../data/models/user_model.dart';
@@ -24,7 +25,7 @@ class AuthService {
       await GoogleSignIn.instance.authenticate();
 
       final GoogleSignInAuthentication googleAuth =
-      await googleUser.authentication;
+      googleUser.authentication;
 
       final credential = GoogleAuthProvider.credential(
         idToken: googleAuth.idToken,
@@ -39,8 +40,8 @@ class AuthService {
 
       return user;
     } catch (e, stackTrace) {
-      print('Google Sign-In error: $e');
-      print('Stack trace: $stackTrace');
+      debugPrint('Google Sign-In error: $e');
+      debugPrint('Stack trace: $stackTrace');
       return null;
     }
   }

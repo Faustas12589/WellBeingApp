@@ -147,7 +147,6 @@ class RewardService {
     final picked = _pickPetByRarity(pets);
     final userRef = _db.collection('users').doc(userId);
 
-    String? unlockedSkin;
 
     final isDuplicate = await _db.runTransaction<bool>((tx) async {
       final snap = await tx.get(userRef);
@@ -175,8 +174,6 @@ class RewardService {
           newDuplicateCount: newDuplicateCount,
           alreadyUnlockedSkins: petProgress.unlockedSkins,
         );
-        // Capture for use outside the transaction
-        unlockedSkin = skinKey;
 
         tx.update(userRef, {
           'ownedPets.${picked.id}.duplicateCount': FieldValue.increment(1),

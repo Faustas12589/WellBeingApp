@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
-import 'package:pvp/features/habits/data/foreground_time_tracker.dart';
+import 'package:well_being_app/features/habits/data/foreground_time_tracker.dart';
 
 import 'features/habits/data/HabitRepository.dart';
 import 'features/habits/models/dayLog.dart';
@@ -155,11 +155,15 @@ class _MainScreenState extends State<MainScreen>
         final userRepo = UserRepository();
         final (:oldLevel, :newLevel) = await userRepo.addUserXp(widget.userId, 20);
 
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Gavai +20 XP!", style: TextStyle(fontWeight: FontWeight.bold))),
-          );
-        }
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              context.read<LanguageNotifier>().t('gained_xp'),
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+        );
 
         final rewardNotifier = context.read<RewardNotifier>();
         await RewardService().checkLevelUp(
@@ -203,6 +207,8 @@ class _MainScreenState extends State<MainScreen>
 
   @override
   void dispose() {
+    // Stop the app-usage tracker so it doesn't keep awarding XP after logout.
+    _tracker?.stop();
     _rewardNotifier.removeListener(_onRewardChanged);
     tabController.dispose();
     super.dispose();

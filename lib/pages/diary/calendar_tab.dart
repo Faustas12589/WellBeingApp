@@ -160,7 +160,7 @@ class CalendarTab extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.all(20),
           child: ElevatedButton.icon(
-            onPressed: () => DefaultTabController.of(context)?.animateTo(0),
+            onPressed: () => DefaultTabController.of(context).animateTo(0),
             icon: const Icon(Icons.add),
             label: const Text("Pridėti naują įrašą"),
             style: ElevatedButton.styleFrom(
