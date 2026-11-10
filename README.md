@@ -2,7 +2,13 @@
 
 A Flutter + Firebase mobile app for self-improvement: track habits, keep a mood diary, see your progress in charts, and grow a collection of virtual pets as you go.
 
-<!-- TODO: add 3–4 screenshots or a short GIF here, e.g. ![Habits](docs/screenshots/habits.png) -->
+<p align="center">
+  <img src="docs/screenshots/habits.png" alt="Habits" width="19%">
+  <img src="docs/screenshots/habitTracker.png" alt="Habit tracker" width="19%">
+  <img src="docs/screenshots/goals.png" alt="Goals" width="19%">
+  <img src="docs/screenshots/moodTracker.png" alt="Mood tracker" width="19%">
+  <img src="docs/screenshots/profile.png" alt="Profile and pet" width="19%">
+</p>
 
 ## Features
 
@@ -33,17 +39,18 @@ lib/
 
 ## My contribution
 
-This was a 4-person university team project. I worked on:
+This was a 5-person university team project at first, then continued as a solo project for further development. I worked on:
 
-<!-- TODO: fill in what you built yourself. Examples based on your commits:
+- All of habits and statistics logic and integration
 - Connected the app to Firebase and built the automated tasks
-- Daily and level-up rewards and the collection log
 - Login and collection screens
 - Saving the selected theme to the database, English language support, mood chart
--->
 
-Team: <!-- TODO: add teammates' GitHub profiles, e.g. [Rokiz12](https://github.com/Rokiz12), [lukkool](https://github.com/lukkool), TautvydasIT -->
-Original repository: <!-- TODO: link it here if it's public, e.g. https://github.com/Rokiz12/Saviugdymo_Programele -->
+Team:
+- [Rokiz12](https://github.com/Rokiz12)
+- [lukkool](https://github.com/lukkool)
+- [TautvydasIT](https://github.com/TautvydasIT)
+- Karolina
 
 ## Tests
 
@@ -72,6 +79,3 @@ Firebase config files are not committed. To run the app with your own Firebase p
    flutter run
    ```
 
-<!-- TODO: note the Firestore data the app expects to already exist (e.g. `pets`, `quotes`, `diaryQuestions` collections), or include a seed script. -->
-
-Diary questions live in the `diaryQuestions` collection. Each document has a Lithuanian `question` field and an optional English `question_en` field; when English is selected and `question_en` is missing, the Lithuanian text is shown.

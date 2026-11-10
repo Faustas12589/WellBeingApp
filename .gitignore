@@ -58,3 +58,9 @@ lib/services/auth_service.dart
 # Environment files
 .env
 .env.*
+
+# Demo seed script secrets and backups
+/tools/demo_seed/serviceAccountKey.json
+/tools/demo_seed/backup*.json
+/tools/demo_seed/node_modules/
+todo

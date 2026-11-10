@@ -1,0 +1,12 @@
+{
+  "name": "demo-seed",
+  "private": true,
+  "description": "Temporary demo data for app screenshots",
+  "scripts": {
+    "seed": "node seed.js seed",
+    "clean": "node seed.js clean"
+  },
+  "dependencies": {
+    "firebase-admin": "^12.7.0"
+  }
+}
