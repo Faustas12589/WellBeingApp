@@ -69,18 +69,4 @@ class DiaryEntryModel {
     };
   }
 
-  // metodas preview generavimui
-  static String generatePreview(String highlight, String diaryText) {
-    if (highlight.isNotEmpty) {
-      return highlight.length > 50
-          ? highlight.substring(0, 47) + '...'
-          : highlight;
-    } else if (diaryText.isNotEmpty) {
-      return diaryText.length > 50
-          ? diaryText.substring(0, 47) + '...'
-          : diaryText;
-    } else {
-      return "Tuščias įrašas";
-    }
-  }
 }

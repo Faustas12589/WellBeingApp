@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:before_after/before_after.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../data/models/diary_entry_model.dart';
+import 'package:provider/provider.dart';
 import '../../theme/app_theme.dart';
+import '../../services/language_notifier.dart';
 
 class FullScreenComparisonPage extends StatefulWidget {
   final DiaryEntryModel beforeEntry;
@@ -26,6 +28,7 @@ class _FullScreenComparisonPageState extends State<FullScreenComparisonPage> {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final lang = context.watch<LanguageNotifier>();
     
     return Scaffold(
       backgroundColor: Colors.black, 
@@ -54,8 +57,8 @@ class _FullScreenComparisonPageState extends State<FullScreenComparisonPage> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text("PRIEŠ", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
-              Text("PO (ŠIANDIEN)", style: TextStyle(color: colors.intenseColor, fontWeight: FontWeight.bold, fontSize: 18)),
+              Text(lang.t('before'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
+              Text(lang.t('after_today'), style: TextStyle(color: colors.intenseColor, fontWeight: FontWeight.bold, fontSize: 18)),
             ],
           ),
         ),

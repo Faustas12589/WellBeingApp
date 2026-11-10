@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../models/models.dart';
+import 'package:provider/provider.dart';
 import '../../../theme/app_theme.dart';
+import '../../../services/language_notifier.dart';
 
 class HabitEditorDialog extends StatefulWidget {
   final Habit? initial;
@@ -53,7 +55,7 @@ class _IconPickerFieldState extends State<IconPickerField> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text("Ikonėlė", style: TextStyle(fontWeight: FontWeight.bold)),
+        Text(context.watch<LanguageNotifier>().t('icon_label'), style: const TextStyle(fontWeight: FontWeight.bold)),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
@@ -90,7 +92,7 @@ class _HabitEditorDialogState extends State<HabitEditorDialog> {
   final _minCtrl      = TextEditingController();
   final _maxCtrl      = TextEditingController();
   final _optionsCtrl  = TextEditingController();
-  final _stepGoalCtrl = TextEditingController(); // ← new
+  final _stepGoalCtrl = TextEditingController();
 
   RatingKind _kind = RatingKind.checkbox;
   String? _selectedIcon;
@@ -126,16 +128,17 @@ class _HabitEditorDialogState extends State<HabitEditorDialog> {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final editing = widget.initial != null;
+    final lang = context.watch<LanguageNotifier>();
 
     return AlertDialog(
 
-      title: Text(editing ? "Redaguoti įprotį" : "Naujas įprotis"),
+      title: Text(lang.t(editing ? 'edit_habit' : 'new_habit')),
       content: SingleChildScrollView(
         child: Column(
           children: [
             TextField(
               controller: _nameCtrl,
-              decoration: const InputDecoration(labelText: "Pavadinimas"),
+              decoration: InputDecoration(labelText: lang.t('title_label')),
             ),
             const SizedBox(height: 16),
 
@@ -147,17 +150,17 @@ class _HabitEditorDialogState extends State<HabitEditorDialog> {
 
             DropdownButtonFormField<RatingKind>(
               value: _kind,
-              decoration: const InputDecoration(labelText: 'Tipas'),
+              decoration: InputDecoration(labelText: lang.t('type_label')),
               items: RatingKind.values.map((k) {
                 return DropdownMenuItem(
                   value: k,
                   child: Text(
                     switch (k) {
-                      RatingKind.checkbox   => "Pažyma (✔/✖)",
-                      RatingKind.number     => "Skaičius",
-                      RatingKind.scale      => "Skalė",
-                      RatingKind.enumerator => "Kategorija",
-                      RatingKind.steps      => "Žingsniai 👟",  // ← new
+                      RatingKind.checkbox   => lang.t('type_checkbox'),
+                      RatingKind.number     => lang.t('type_number'),
+                      RatingKind.scale      => lang.t('type_scale'),
+                      RatingKind.enumerator => lang.t('type_category'),
+                      RatingKind.steps      => lang.t('type_steps'),
                     },
                   ),
                 );
@@ -186,27 +189,27 @@ class _HabitEditorDialogState extends State<HabitEditorDialog> {
               const SizedBox(height: 12),
               TextField(
                 controller: _optionsCtrl,
-                decoration: const InputDecoration(
-                  labelText: "Parinktys (atskirti kableliais)",
+                decoration: InputDecoration(
+                  labelText: lang.t('options_label'),
                 ),
               ),
             ],
 
-            // Steps field  ← new
+            // Steps field
             if (_kind == RatingKind.steps) ...[
               const SizedBox(height: 12),
               TextField(
                 controller: _stepGoalCtrl,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: "Tikslas (žingsniai)",
-                  hintText: "pvz. 10000",
-                  prefixIcon: Icon(Icons.directions_walk),
+                decoration: InputDecoration(
+                  labelText: lang.t('steps_goal_label'),
+                  hintText: lang.t('steps_goal_hint'),
+                  prefixIcon: const Icon(Icons.directions_walk),
                 ),
               ),
               const SizedBox(height: 8),
               Text(
-                "Pažymės kaip atliktą automatiškai, kai pasieksite tikslą.",
+                lang.t('steps_auto_complete'),
                 style: TextStyle(fontSize: 12, color : colors.textColor),
               ),
             ],
@@ -217,11 +220,11 @@ class _HabitEditorDialogState extends State<HabitEditorDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text("Atšaukti"),
+          child: Text(lang.t('cancel')),
         ),
         TextButton(
           onPressed: _submit,
-          child: Text(editing ? "Išsaugoti" : "Pridėti"),
+          child: Text(lang.t(editing ? 'save' : 'add')),
         ),
       ],
     );
@@ -265,7 +268,7 @@ class _HabitEditorDialogState extends State<HabitEditorDialog> {
       max: max,
       options: opts,
       icon: _selectedIcon,
-      stepGoal: stepGoal,   // ← new
+      stepGoal: stepGoal, 
     );
 
     Navigator.pop(context, habit);

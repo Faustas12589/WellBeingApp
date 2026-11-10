@@ -6,18 +6,20 @@ import '../../services/reward_service.dart';
 import '../../services/reward_notifier.dart';
 import 'diary_provider.dart';
 import 'diary_dialogs.dart';
+import '../../services/language_notifier.dart';
 
 class NewEntryTab extends StatelessWidget {
   const NewEntryTab({super.key});
 
   void _handleSave(BuildContext context, DiaryProvider provider) async {
+    final lang = context.read<LanguageNotifier>();
     if (!provider.canAddEntry) {
-      DiaryDialogs.showUpgradeDialog(context, 'Nemokamoje versijoje galima pridėti tik 2 įrašus per savaitę.');
+      DiaryDialogs.showUpgradeDialog(context, lang.tp('entry_limit_week_msg', {'limit': 2, 'this_week': provider.entriesThisWeek}));
       return;
     }
 
     if (provider.selectedMood.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Pasirink nuotaiką!")));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(lang.t('pick_mood'))));
       return;
     }
 
@@ -39,17 +41,17 @@ class NewEntryTab extends StatelessWidget {
       final (gotXp, oldLvl, newLvl) = await provider.saveEntry(moodImagePath);
       if (!context.mounted) return;
       Navigator.pop(context); // close loading
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Įrašas išsaugotas!"), backgroundColor: Colors.green));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(lang.t('entry_saved')), backgroundColor: Colors.green));
       
       if (gotXp) {
         RewardService().checkLevelUp(userId: provider.userId, oldLevel: oldLvl, newLevel: newLvl, notifier: context.read<RewardNotifier>());
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Gavai +20 XP!", style: TextStyle(fontWeight: FontWeight.bold))));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(lang.t('gained_xp'), style: const TextStyle(fontWeight: FontWeight.bold))));
       }
       DefaultTabController.of(context).animateTo(1);
     } catch (e) {
       if (!context.mounted) return;
       Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Klaida: $e")));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(lang.tp('error_with_details', {'error': e}))));
     }
   }
 
@@ -57,6 +59,7 @@ class NewEntryTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final provider = context.watch<DiaryProvider>();
+    final lang = context.watch<LanguageNotifier>();
 
     if (!provider.questionsLoaded) {
       return Center(child: CircularProgressIndicator(color: colors.intenseColor));
@@ -69,12 +72,12 @@ class NewEntryTab extends StatelessWidget {
           children: [
             Icon(Icons.error_outline, size: 48, color: colors.appBarUnpickedColor),
             const SizedBox(height: 16),
-            Text("Atsiprašome, klausimai nėra prieinami", style: TextStyle(fontSize: 16, color: colors.textColor)),
+            Text(lang.t('questions_unavailable'), style: TextStyle(fontSize: 16, color: colors.textColor)),
             const SizedBox(height: 24),
             ElevatedButton.icon(
               onPressed: provider.loadQuestions,
               icon: const Icon(Icons.refresh),
-              label: const Text("Bandyti dar kartą"),
+              label: Text(lang.t('retry')),
               style: ElevatedButton.styleFrom(backgroundColor: colors.intenseColor, foregroundColor: Colors.black),
             ),
           ],
@@ -87,7 +90,7 @@ class NewEntryTab extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text("Kaip jautiesi?", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: colors.textColor)),
+          Text(lang.t('diary_m'), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: colors.textColor)),
           const SizedBox(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -97,13 +100,13 @@ class NewEntryTab extends StatelessWidget {
           
           ...[
             for (int i = 0; i < provider.currentQuestions.length; i++)
-              _buildField(context, provider, provider.currentQuestions[i].question, i, maxLines: provider.currentQuestions[i].maxLines),
+              _buildField(context, provider, provider.currentQuestions[i].textFor(lang.locale), i, maxLines: provider.currentQuestions[i].maxLines),
           ],
           
-          _buildField(context, provider, "Laisvas dienoraštis", 3, maxLines: 4),
+          _buildField(context, provider, lang.t('diary_diary_entry'), 3, maxLines: 4),
           
           const SizedBox(height: 16),
-          Text("Prisegti nuotrauką (neprivaloma)", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: colors.textColor)),
+          Text(lang.t('diary_add_photo'), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: colors.textColor)),
           const SizedBox(height: 12),
           GestureDetector(
             onTap: () => DiaryDialogs.showImagePickerOptions(context, provider),
@@ -137,7 +140,7 @@ class NewEntryTab extends StatelessWidget {
                       children: [
                         Icon(Icons.add_photo_alternate, size: 48, color: colors.appBarUnpickedColor),
                         const SizedBox(height: 12),
-                        Text("Paspauskite, kad pridėtumėte", style: TextStyle(color: colors.appBarUnpickedColor, fontWeight: FontWeight.w500)),
+                        Text(lang.t('diary_press_to_add'), style: TextStyle(color: colors.appBarUnpickedColor, fontWeight: FontWeight.w500)),
                       ],
                     ),
             ),
@@ -146,7 +149,7 @@ class NewEntryTab extends StatelessWidget {
           if (provider.selectedImage != null) ...[
             const SizedBox(height: 20),
             if (provider.categories.isNotEmpty) ...[
-              Text("Pasirinkite kategoriją:", style: TextStyle(fontWeight: FontWeight.bold, color: colors.textColor)),
+              Text(lang.t('select_category'), style: TextStyle(fontWeight: FontWeight.bold, color: colors.textColor)),
               const SizedBox(height: 8),
               DropdownButtonFormField<String>(
                 value: provider.categories.contains(provider.selectedUploadCategory) ? provider.selectedUploadCategory : provider.categories.first,
@@ -160,7 +163,7 @@ class NewEntryTab extends StatelessWidget {
                 onChanged: (val) { if (val != null) provider.setUploadCategory(val); },
               ),
             ] else ...[
-              Text("Neturite sukūrę jokių kategorijų. Galite jas pridėti Prisiminimų skiltyje!", style: TextStyle(color: colors.appBarUnpickedColor, fontStyle: FontStyle.italic))
+              Text(lang.t('no_categories_message'), style: TextStyle(color: colors.appBarUnpickedColor, fontStyle: FontStyle.italic))
             ],
           ],
 
@@ -174,7 +177,7 @@ class NewEntryTab extends StatelessWidget {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
               elevation: 0,
             ),
-            child: const Text("Išsaugoti įrašą", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            child: Text(lang.t('save_entry'), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
           ),
           const SizedBox(height: 20),
         ],
@@ -202,7 +205,7 @@ class NewEntryTab extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            provider.moods[i],
+            context.watch<LanguageNotifier>().moodLabel(provider.moods[i]),
             style: TextStyle(
               fontSize: 11,
               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
@@ -228,7 +231,7 @@ class NewEntryTab extends StatelessWidget {
             maxLines: maxLines,
             style: TextStyle(color: colors.textColor),
             decoration: InputDecoration(
-              hintText: "Rašyk čia...", hintStyle: TextStyle(color: colors.appBarUnpickedColor),
+              hintText: context.watch<LanguageNotifier>().t('write_here'), hintStyle: TextStyle(color: colors.appBarUnpickedColor),
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
               filled: true, fillColor: colors.background2,
             ),

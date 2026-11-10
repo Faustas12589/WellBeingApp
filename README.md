@@ -73,3 +73,5 @@ Firebase config files are not committed. To run the app with your own Firebase p
    ```
 
 <!-- TODO: note the Firestore data the app expects to already exist (e.g. `pets`, `quotes`, `diaryQuestions` collections), or include a seed script. -->
+
+Diary questions live in the `diaryQuestions` collection. Each document has a Lithuanian `question` field and an optional English `question_en` field; when English is selected and `question_en` is missing, the Lithuanian text is shown.

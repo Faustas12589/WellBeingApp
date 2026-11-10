@@ -7,6 +7,7 @@ import '../../theme/app_theme.dart';
 import 'diary_provider.dart';
 import 'diary_dialogs.dart';
 import 'comparison_page.dart';
+import '../../services/language_notifier.dart';
 
 class MemoriesTab extends StatelessWidget {
   const MemoriesTab({super.key});
@@ -15,6 +16,7 @@ class MemoriesTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final provider = context.watch<DiaryProvider>();
+    final lang = context.watch<LanguageNotifier>();
     final memories = provider.allEntries.where((e) => e.imageUrl != null && e.imageUrl!.isNotEmpty).toList();
     memories.sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
@@ -25,9 +27,9 @@ class MemoriesTab extends StatelessWidget {
           child: SizedBox(
             width: double.infinity,
             child: SegmentedButton<int>(
-              segments: const [
-                ButtonSegment(value: 0, label: Text("Kategorijos"), icon: Icon(Icons.folder)),
-                ButtonSegment(value: 1, label: Text("Visos"), icon: Icon(Icons.photo_library)),
+              segments: [
+                ButtonSegment(value: 0, label: Text(lang.t('memories_categories')), icon: const Icon(Icons.folder)),
+                ButtonSegment(value: 1, label: Text(lang.t('memories_all')), icon: const Icon(Icons.photo_library)),
               ],
               selected: {provider.memoriesViewIndex},
               onSelectionChanged: (newSelection) => provider.setMemoriesView(newSelection.first),
@@ -48,7 +50,7 @@ class MemoriesTab extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text("${provider.selectedForDeletion.length} pasirinkta", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: colors.textColor)),
+                Text(lang.tp('n_selected', {'count': provider.selectedForDeletion.length}), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: colors.textColor)),
                 Row(
                   children: [
                     IconButton(
@@ -61,7 +63,7 @@ class MemoriesTab extends StatelessWidget {
                           );
                           provider.deleteSelectedImages().then((_) {
                             Navigator.pop(context);
-                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Ištrinta!"), backgroundColor: Colors.green));
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(lang.t('photos_deleted_success')), backgroundColor: Colors.green));
                           });
                         }
                       },
@@ -83,13 +85,14 @@ class MemoriesTab extends StatelessWidget {
   }
 
   Widget _buildCategoriesView(BuildContext context, DiaryProvider provider, List<DiaryEntryModel> memories) {
+    final lang = context.read<LanguageNotifier>();
     final colors = context.colors;
 
     if (provider.selectedCategoryView == null) {
       return Stack(
         children: [
           if (provider.categories.isEmpty)
-            Center(child: Text("Sukurkite pirmąją kategoriją!", style: TextStyle(color: colors.appBarUnpickedColor)))
+            Center(child: Text(lang.t('create_first_category'), style: TextStyle(color: colors.appBarUnpickedColor)))
           else
             GridView.builder(
               padding: const EdgeInsets.all(16),
@@ -114,7 +117,7 @@ class MemoriesTab extends StatelessWidget {
                           child: Text(cat, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: colors.textColor), textAlign: TextAlign.center, maxLines: 2, overflow: TextOverflow.ellipsis),
                         ),
                         const SizedBox(height: 4),
-                        Text("${catMemories.length} nuotr.", style: TextStyle(color: colors.appBarUnpickedColor, fontSize: 12)),
+                        Text(lang.tp('photos_count_short', {'count': catMemories.length}), style: TextStyle(color: colors.appBarUnpickedColor, fontSize: 12)),
                       ],
                     ),
                   ),
@@ -144,7 +147,7 @@ class MemoriesTab extends StatelessWidget {
           if (!provider.isSelectionMode) _buildComparisonForCategory(context, categoryMemories),
           Expanded(
             child: categoryMemories.isEmpty
-                ? Center(child: Text("Šioje kategorijoje nėra nuotraukų.", style: TextStyle(color: colors.appBarUnpickedColor)))
+                ? Center(child: Text(lang.t('no_photos_in_category'), style: TextStyle(color: colors.appBarUnpickedColor)))
                 : _buildPhotoGrid(context, provider, categoryMemories),
           ),
         ],
@@ -153,7 +156,8 @@ class MemoriesTab extends StatelessWidget {
   }
 
   Widget _buildAllPhotosView(BuildContext context, DiaryProvider provider, List<DiaryEntryModel> memories) {
-    if (memories.isEmpty) return Center(child: Text("Dar nėra jokių nuotraukų.", style: TextStyle(color: context.colors.appBarUnpickedColor)));
+    final lang = context.read<LanguageNotifier>();
+    if (memories.isEmpty) return Center(child: Text(lang.t('no_photos_yet'), style: TextStyle(color: context.colors.appBarUnpickedColor)));
     return _buildPhotoGrid(context, provider, memories);
   }
 
@@ -208,6 +212,7 @@ class MemoriesTab extends StatelessWidget {
   }
 
   Widget _buildComparisonForCategory(BuildContext context, List<DiaryEntryModel> categoryMemories) {
+    final lang = context.read<LanguageNotifier>();
     if (categoryMemories.length < 2) return const SizedBox.shrink();
     final today = DateTime.now();
     DiaryEntryModel? memoryFromToday;
@@ -215,10 +220,10 @@ class MemoriesTab extends StatelessWidget {
     String singleTitle = ""; String comparisonTitle = "";
 
     try { memoryFromToday = categoryMemories.firstWhere((e) => e.createdAt.year == today.year && e.createdAt.month == today.month && e.createdAt.day == today.day); } catch (_) {}
-    try { pastMemory = categoryMemories.firstWhere((e) => e.createdAt.year == today.year - 1 && e.createdAt.month == today.month && e.createdAt.day == today.day); singleTitle = "Prieš metus šioje kategorijoje..."; comparisonTitle = "1 Metų Progresas!"; } catch (_) {}
+    try { pastMemory = categoryMemories.firstWhere((e) => e.createdAt.year == today.year - 1 && e.createdAt.month == today.month && e.createdAt.day == today.day); singleTitle = lang.t('comparison_year_ago_title'); comparisonTitle = lang.t('comparison_year_progress'); } catch (_) {}
     if (pastMemory == null) {
       final oneMonthAgo = DateTime(today.year, today.month - 1, today.day);
-      try { pastMemory = categoryMemories.firstWhere((e) => e.createdAt.year == oneMonthAgo.year && e.createdAt.month == oneMonthAgo.month && e.createdAt.day == oneMonthAgo.day); singleTitle = "Prieš mėnesį šioje kategorijoje..."; comparisonTitle = "1 Mėnesio Progresas!"; } catch (_) {}
+      try { pastMemory = categoryMemories.firstWhere((e) => e.createdAt.year == oneMonthAgo.year && e.createdAt.month == oneMonthAgo.month && e.createdAt.day == oneMonthAgo.day); singleTitle = lang.t('comparison_month_ago_title'); comparisonTitle = lang.t('comparison_month_progress'); } catch (_) {}
     }
 
     if (memoryFromToday != null && pastMemory != null && memoryFromToday.id != pastMemory.id) {
@@ -230,6 +235,7 @@ class MemoriesTab extends StatelessWidget {
   }
 
   Widget _buildComparisonPreviewCard(BuildContext context, DiaryEntryModel beforeEntry, DiaryEntryModel afterEntry, String title) {
+    final lang = context.read<LanguageNotifier>();
     final colors = context.colors;
     return GestureDetector(
       onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => FullScreenComparisonPage(beforeEntry: beforeEntry, afterEntry: afterEntry, title: title))),
@@ -245,7 +251,7 @@ class MemoriesTab extends StatelessWidget {
             children: [
               Icon(Icons.compare_arrows, color: colors.intenseColor, size: 40), const SizedBox(height: 8),
               Text(title, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)), const SizedBox(height: 4),
-              const Text("Paspauskite, kad palygintumėte!", style: TextStyle(color: Colors.white70, fontSize: 14)),
+              Text(lang.t('press_to_compare'), style: const TextStyle(color: Colors.white70, fontSize: 14)),
             ],
           ),
         ),

@@ -1,13 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 
 import '../../data/models/diary_entry_model.dart';
 import '../../theme/app_theme.dart';
 import 'diary_provider.dart';
+import '../../services/language_notifier.dart';
 
 class DiaryDialogs {
+  /// Older entries stored a Lithuanian "empty entry" text; newer ones store ''.
+  static String _previewText(DiaryEntryModel e, LanguageNotifier lang) {
+    if (e.preview.isEmpty || e.preview == 'Tuščias įrašas') return lang.t('empty_entry');
+    return e.preview;
+  }
+
   static void showUpgradeDialog(BuildContext context, String message) {
+    final lang = context.read<LanguageNotifier>();
     final colors = context.colors;
     showDialog(
       context: context,
@@ -18,7 +27,7 @@ class DiaryDialogs {
           children: [
             const Text('⭐', style: TextStyle(fontSize: 22)),
             const SizedBox(width: 8),
-            Text('Premium funkcija', style: TextStyle(fontWeight: FontWeight.bold, color: colors.textColor)),
+            Text(lang.t('premium_feature_title'), style: TextStyle(fontWeight: FontWeight.bold, color: colors.textColor)),
           ],
         ),
         content: Column(
@@ -37,11 +46,11 @@ class DiaryDialogs {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Premium privalumai:', style: TextStyle(fontWeight: FontWeight.bold, color: colors.textColor)),
+                  Text(lang.t('premium_benefits_title'), style: TextStyle(fontWeight: FontWeight.bold, color: colors.textColor)),
                   const SizedBox(height: 6),
-                  Text('✅ Neriboti dienoraščio įrašai', style: TextStyle(color: colors.textColor)),
-                  Text('✅ Neriboti nuotraukų prisegimas', style: TextStyle(color: colors.textColor)),
-                  Text('✅ Visi statistikos įrankiai', style: TextStyle(color: colors.textColor)),
+                  Text(lang.t('premium_benefit_unlimited_entries'), style: TextStyle(color: colors.textColor)),
+                  Text(lang.t('premium_benefit_unlimited_photos'), style: TextStyle(color: colors.textColor)),
+                  Text(lang.t('premium_benefit_stats'), style: TextStyle(color: colors.textColor)),
                 ],
               ),
             ),
@@ -50,7 +59,7 @@ class DiaryDialogs {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Vėliau', style: TextStyle(color: colors.appBarUnpickedColor)),
+            child: Text(lang.t('later'), style: TextStyle(color: colors.appBarUnpickedColor)),
           ),
           ElevatedButton(
             onPressed: () {
@@ -58,7 +67,7 @@ class DiaryDialogs {
               // TODO: navigate to paywall
             },
             style: ElevatedButton.styleFrom(backgroundColor: colors.intenseColor, foregroundColor: Colors.black, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
-            child: const Text('Gauti Premium', style: TextStyle(fontWeight: FontWeight.bold)),
+            child: Text(lang.t('get_premium'), style: const TextStyle(fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -66,6 +75,7 @@ class DiaryDialogs {
   }
 
   static void showAddCategoryDialog(BuildContext context, DiaryProvider provider) {
+    final lang = context.read<LanguageNotifier>();
     final colors = context.colors;
 
     // Premium gate: max 1 category for free users
@@ -74,15 +84,15 @@ class DiaryDialogs {
         context: context,
         builder: (context) => AlertDialog(
           backgroundColor: colors.background2,
-          title: Text("⭐ Premium funkcija", style: TextStyle(color: colors.textColor)),
+          title: Text('⭐ ${lang.t('premium_feature_title')}', style: TextStyle(color: colors.textColor)),
           content: Text(
-            "Nemokama versija leidžia turėti tik 1 kategoriją. Gauk Premium ir turėk neribotai!",
+            lang.t('premium_category_limit'),
             style: TextStyle(color: colors.appBarUnpickedColor),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text("Atšaukti", style: TextStyle(color: colors.textColor)),
+              child: Text(lang.t('cancel'), style: TextStyle(color: colors.textColor)),
             ),
             ElevatedButton(
               onPressed: () {
@@ -94,7 +104,7 @@ class DiaryDialogs {
                 foregroundColor: Colors.black,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
-              child: const Text("Gauti Premium"),
+              child: Text(lang.t('get_premium')),
             ),
           ],
         ),
@@ -109,12 +119,12 @@ class DiaryDialogs {
       builder: (context) {
         return AlertDialog(
           backgroundColor: colors.background2,
-          title: Text("Nauja kategorija", style: TextStyle(color: colors.textColor)),
+          title: Text(lang.t('new_category'), style: TextStyle(color: colors.textColor)),
           content: TextField(
             controller: catController,
             style: TextStyle(color: colors.textColor),
             decoration: InputDecoration(
-              hintText: "Pvz.: Sporto progresas",
+              hintText: lang.t('category_hint'),
               hintStyle: TextStyle(color: colors.appBarUnpickedColor),
               filled: true,
               fillColor: colors.background,
@@ -124,7 +134,7 @@ class DiaryDialogs {
             textCapitalization: TextCapitalization.sentences,
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(context), child: Text("Atšaukti", style: TextStyle(color: colors.textColor))),
+            TextButton(onPressed: () => Navigator.pop(context), child: Text(lang.t('cancel'), style: TextStyle(color: colors.textColor))),
             ElevatedButton(
               onPressed: () {
                 final text = catController.text.trim();
@@ -132,11 +142,11 @@ class DiaryDialogs {
                   provider.addCategory(text);
                   Navigator.pop(context);
                 } else if (provider.categories.contains(text)) {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Tokia kategorija jau egzistuoja!")));
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(lang.t('category_already_exists'))));
                 }
               },
               style: ElevatedButton.styleFrom(backgroundColor: colors.intenseColor, foregroundColor: Colors.black, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
-              child: const Text("Pridėti"),
+              child: Text(lang.t('add')),
             ),
           ],
         );
@@ -145,24 +155,25 @@ class DiaryDialogs {
   }
 
   static void showDeleteCategoryDialog(BuildContext context, DiaryProvider provider, String category) {
+    final lang = context.read<LanguageNotifier>();
     final colors = context.colors;
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
           backgroundColor: colors.background2,
-          title: Text("Ištrinti kategoriją?", style: TextStyle(color: colors.textColor)),
-          content: Text("Ar tikrai norite ištrinti aplankalą '$category'?\n\nNuotraukos nebus ištrintos, jos atsiras skiltyje 'Visos'.", style: TextStyle(color: colors.textColor)),
+          title: Text(lang.t('delete_category_confirm'), style: TextStyle(color: colors.textColor)),
+          content: Text(lang.tp('delete_category_text', {'category': category}), style: TextStyle(color: colors.textColor)),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(context), child: Text("Atšaukti", style: TextStyle(color: colors.textColor))),
+            TextButton(onPressed: () => Navigator.pop(context), child: Text(lang.t('cancel'), style: TextStyle(color: colors.textColor))),
             ElevatedButton(
               onPressed: () {
                 provider.deleteCategory(category);
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Kategorija '$category' ištrinta!"), backgroundColor: Colors.redAccent));
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(lang.tp('category_deleted', {'category': category})), backgroundColor: Colors.redAccent));
               },
               style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
-              child: const Text("Ištrinti"),
+              child: Text(lang.t('delete')),
             ),
           ],
         );
@@ -171,9 +182,10 @@ class DiaryDialogs {
   }
 
   static void showImagePickerOptions(BuildContext context, DiaryProvider provider) {
+    final lang = context.read<LanguageNotifier>();
     final colors = context.colors;
     if (!provider.canAddPhoto) {
-      showUpgradeDialog(context, 'Nemokamoje versijoje galima prisegti tik 3 nuotraukas per savaitę.\n\nŠi savaitė: ${provider.photosThisWeek} / 3 nuotraukos.');
+      showUpgradeDialog(context, lang.tp('photo_limit_week_msg', {'limit': 3, 'this_week': provider.photosThisWeek}));
       return;
     }
 
@@ -191,21 +203,21 @@ class DiaryDialogs {
               ),
               ListTile(
                 leading: Icon(Icons.photo_library, color: colors.textColor),
-                title: Text('Pasirinkti iš galerijos', style: TextStyle(color: colors.textColor)),
+                title: Text(lang.t('pick_from_gallery'), style: TextStyle(color: colors.textColor)),
                 onTap: () {
                   Navigator.pop(context);
                   provider.pickImage(ImageSource.gallery).catchError((e) {
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Klaida: $e")));
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(lang.tp('error_with_details', {'error': e}))));
                   });
                 },
               ),
               ListTile(
                 leading: Icon(Icons.photo_camera, color: colors.textColor),
-                title: Text('Daryti naują nuotrauką', style: TextStyle(color: colors.textColor)),
+                title: Text(lang.t('take_new_photo'), style: TextStyle(color: colors.textColor)),
                 onTap: () {
                   Navigator.pop(context);
                   provider.pickImage(ImageSource.camera).catchError((e) {
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Klaida: $e")));
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(lang.tp('error_with_details', {'error': e}))));
                   });
                 },
               ),
@@ -218,6 +230,7 @@ class DiaryDialogs {
   }
 
   static void showEntryDialog(BuildContext context, DiaryEntryModel e) {
+    final lang = context.read<LanguageNotifier>();
     final colors = context.colors;
     final dateStr = '${e.createdAt.year}-${e.createdAt.month.toString().padLeft(2, '0')}-${e.createdAt.day.toString().padLeft(2, '0')}';
     showDialog(
@@ -238,7 +251,7 @@ class DiaryDialogs {
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(color: colors.primary, borderRadius: BorderRadius.circular(8)),
-                    child: Text(e.mood, style: TextStyle(color: colors.textColor)),
+                    child: Text(lang.moodLabel(e.mood), style: TextStyle(color: colors.textColor)),
                   ),
                 ],
               ),
@@ -254,12 +267,13 @@ class DiaryDialogs {
             ],
           ),
         ),
-        actions: [TextButton(onPressed: () => Navigator.pop(context), child: Text("Uždaryti", style: TextStyle(color: colors.textColor)))],
+        actions: [TextButton(onPressed: () => Navigator.pop(context), child: Text(lang.t('close'), style: TextStyle(color: colors.textColor)))],
       ),
     );
   }
 
   static void showEntriesList(BuildContext context, List<DiaryEntryModel> entries) {
+    final lang = context.read<LanguageNotifier>();
     final colors = context.colors;
     final dateStr = '${entries.first.createdAt.year}-${entries.first.createdAt.month.toString().padLeft(2, '0')}-${entries.first.createdAt.day.toString().padLeft(2, '0')}';
     
@@ -279,7 +293,7 @@ class DiaryDialogs {
               leading: e.moodImage != null && e.moodImage!.isNotEmpty
                   ? Image.asset(e.moodImage!, width: 32, height: 32)
                   : Text(e.mood.split(' ')[0], style: const TextStyle(fontSize: 24)),              title: Text('${e.createdAt.hour}:${e.createdAt.minute.toString().padLeft(2, '0')}', style: TextStyle(color: colors.textColor)),
-              subtitle: Text(e.preview, maxLines: 1, style: TextStyle(color: colors.appBarUnpickedColor)),
+              subtitle: Text(_previewText(e, lang), maxLines: 1, style: TextStyle(color: colors.appBarUnpickedColor)),
               onTap: () { Navigator.pop(context); showEntryDialog(context, e); },
             )),
           ],

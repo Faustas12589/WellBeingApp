@@ -17,7 +17,14 @@ class DiaryPage extends StatelessWidget {
     final lang = context.watch<LanguageNotifier>();
 
     return ChangeNotifierProvider(
-      create: (_) => DiaryProvider(),
+      create: (_) => DiaryProvider(
+        defaultCategories: [
+          lang.t('default_category_weight'),
+          lang.t('default_category_skin'),
+          lang.t('default_category_room'),
+          lang.t('default_category_creativity'),
+        ],
+      ),
       child: DefaultTabController(
         length: 3,
         child: Scaffold(

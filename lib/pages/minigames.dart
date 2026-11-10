@@ -9,6 +9,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../services/sound_service.dart';
 import '../theme/app_theme.dart';
+import 'package:provider/provider.dart';
+import '../services/language_notifier.dart';
 
 class CollectionPage extends StatefulWidget {
   final String userId;
@@ -71,7 +73,7 @@ class _CollectionPageState extends State<CollectionPage> {
 
     } catch (e) {
       setState(() {
-        _error = 'Failed to load pets: $e';
+        _error = '${context.read<LanguageNotifier>().t('failed_load_pets')}: $e';
         _isLoading = false;
       });
     }
@@ -102,7 +104,7 @@ class _CollectionPageState extends State<CollectionPage> {
             const SizedBox(height: 12),
             ElevatedButton(
               onPressed: _loadData,
-              child: const Text('Retry'),
+              child: Text(context.watch<LanguageNotifier>().t('retry')),
             ),
           ],
         ),
@@ -417,7 +419,7 @@ class _PetDetailSheetState extends State<_PetDetailSheet> {
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('${widget.pet.name} equipped!'),
+            content: Text('${widget.pet.name} ${context.read<LanguageNotifier>().t('equipped_success')}'),
             backgroundColor: widget.rarityColor,
           ),
         );
@@ -426,7 +428,7 @@ class _PetDetailSheetState extends State<_PetDetailSheet> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to equip pet: $e'),
+            content: Text('${context.read<LanguageNotifier>().t('failed_equip_pet')}: $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -439,6 +441,7 @@ class _PetDetailSheetState extends State<_PetDetailSheet> {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final lang = context.watch<LanguageNotifier>();
 
     final imageKey = context.colors.petImageKey;
 
@@ -448,13 +451,13 @@ class _PetDetailSheetState extends State<_PetDetailSheet> {
 
     final screenHeight = MediaQuery.of(context).size.height;
 
-    String _buildLore(Map<String, dynamic> lore, int currentLevel) {
+    String buildLore(Map<String, dynamic> lore, int currentLevel) {
       final parts = <String>[];
       for (int i = 1; i <= currentLevel; i++) {
         final part = lore['level_$i'];
         if (part != null) parts.add(part);
       }
-      return parts.isEmpty ? 'No lore available.' : parts.join('\n\n');
+      return parts.isEmpty ? lang.t('no_lore_available') : parts.join('\n\n');
     }
 
     return Container(
@@ -584,7 +587,7 @@ class _PetDetailSheetState extends State<_PetDetailSheet> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         _StatChip(
-                          label: 'Level',
+                          label: lang.t('level'),
                           value: '${widget.userPet!.level}',
                           color: widget.rarityColor,
                         ),
@@ -605,7 +608,7 @@ class _PetDetailSheetState extends State<_PetDetailSheet> {
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      widget.isOwned ? 'Lore' : 'Lore (Locked)',
+                      widget.isOwned ? lang.t('lore') : lang.t('lore_locked'),
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
@@ -616,7 +619,7 @@ class _PetDetailSheetState extends State<_PetDetailSheet> {
                   const SizedBox(height: 8),
                   if (!widget.isOwned)
                     Text(
-                      'Unlock this pet to reveal its secrets...',
+                      lang.t('unlock_pet_lore'),
                       style: TextStyle(
                         fontSize: 14,
                         color: colors.appBarUnpickedColor,
@@ -637,7 +640,7 @@ class _PetDetailSheetState extends State<_PetDetailSheet> {
                         children: [
                           if (widget.userPet!.level > 1)
                             TextSpan(
-                              text: _buildLore(widget.pet.lore, widget.userPet!.level - 1) + '\n\n',
+                              text: buildLore(widget.pet.lore, widget.userPet!.level - 1) + '\n\n',
                             ),
                           TextSpan(
                             text: widget.pet.lore['level_${widget.userPet!.level}'] ?? '',
@@ -674,7 +677,7 @@ class _PetDetailSheetState extends State<_PetDetailSheet> {
                               color: widget.rarityColor.withValues(alpha: 0.7)),
                           const SizedBox(width: 8),
                           Text(
-                            'Equipped',
+                            lang.t('equipped'),
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
@@ -697,7 +700,7 @@ class _PetDetailSheetState extends State<_PetDetailSheet> {
                           ),
                         )
                             : const Icon(Icons.check_circle_outline),
-                        label: Text(_isEquipping ? 'Equipping...' : 'Equip'),
+                        label: Text(_isEquipping ? '${lang.t('equipping')}...' : lang.t('equip')),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: widget.rarityColor,
                           foregroundColor: colors.background,

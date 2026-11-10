@@ -17,7 +17,7 @@ class DiaryProvider extends ChangeNotifier {
   final DiaryQuestionRepository _questionRepository = DiaryQuestionRepository();
   late String userId;
 
-  // steam and entries
+  // stream and entries
   StreamSubscription? _entriesSub;
   List<DiaryEntryModel> allEntries = [];
   Map<DateTime, List<DiaryEntryModel>> entriesByDate = {};
@@ -38,21 +38,25 @@ class DiaryProvider extends ChangeNotifier {
     TextEditingController(),
   ];
 
-  // Kalendoriaus būsena
+  // Calendar state
   DateTime currentMonth = DateTime.now();
   DateTime? selectedDay;
 
-  // Prisiminimų būsena
+  // Memories state
   int memoriesViewIndex = 0;
   String? selectedCategoryView;
   bool isSelectionMode = false;
   Set<String> selectedForDeletion = {};
 
+  // Saved to the database in Lithuanian; shown via LanguageNotifier.moodLabel.
   final List<String> moods = ['Puikiai', 'Gerai', 'Normaliai', 'Prastai', 'Blogai'];
 
 
 
-  DiaryProvider() {
+  /// Categories created the first time, in the user's language.
+  final List<String> defaultCategories;
+
+  DiaryProvider({this.defaultCategories = const []}) {
     userId = FirebaseAuth.instance.currentUser!.uid;
     _init();
   }
@@ -107,13 +111,13 @@ class DiaryProvider extends ChangeNotifier {
         categories = List<String>.from(doc.data()!['list']);
         selectedUploadCategory = categories.isNotEmpty ? categories.first : '';
       } else {
-        categories = ['Svorio metimas', 'Odos būklė', 'Kambario tvarka', 'Kūryba'];
-        selectedUploadCategory = categories.first;
+        categories = List<String>.from(defaultCategories);
+        selectedUploadCategory = categories.isNotEmpty ? categories.first : '';
         saveCategories();
       }
       notifyListeners();
     } catch (e) {
-      debugPrint("Klaida užkraunant kategorijas: $e");
+      debugPrint("Error loading categories: $e");
     }
   }
 
@@ -126,7 +130,7 @@ class DiaryProvider extends ChangeNotifier {
           .doc('categories')
           .set({'list': categories});
     } catch (e) {
-      debugPrint("Klaida saugant kategorijas: $e");
+      debugPrint("Error saving categories: $e");
     }
   }
 
@@ -157,7 +161,7 @@ class DiaryProvider extends ChangeNotifier {
     }
   }
 
-  // Būsenos keitimo metodai UI failams
+  // State setters used by the UI
   void setMood(String mood) {
     selectedMood = mood;
     notifyListeners();
@@ -219,7 +223,7 @@ class DiaryProvider extends ChangeNotifier {
     closeSelectionMode();
   }
 
-  // Apribojimai
+  // Free-tier limits
   DateTime _weekStart() {
     final now = DateTime.now();
     return DateTime(now.year, now.month, now.day - (now.weekday - 1));
@@ -231,7 +235,7 @@ class DiaryProvider extends ChangeNotifier {
   bool get canAddEntry => isPremium || entriesThisWeek < 2;
   bool get canAddPhoto => isPremium || photosThisWeek < 3;
 
-  // Išsaugojimas
+  // Saving
   Future<(bool, int, int)> saveEntry(String moodImagePath) async {
     final now = DateTime.now();
     final id = '${now.millisecondsSinceEpoch}';
@@ -244,7 +248,7 @@ class DiaryProvider extends ChangeNotifier {
     }
 
     final preview = textControllers[0].text.isNotEmpty ? textControllers[0].text
-        : (textControllers[3].text.isNotEmpty ? textControllers[3].text : "Tuščias įrašas");
+        : textControllers[3].text; // empty preview is shown as a translated "Empty entry"
 
     String? finalCategory;
     if (selectedImage != null && categories.isNotEmpty) {
@@ -268,14 +272,14 @@ class DiaryProvider extends ChangeNotifier {
       ),
     );
 
-    // Išvalome formą
+    // Reset the form
     selectedMood = "";
     selectedImage = null;
     for (var c in textControllers) { c.clear(); }
     loadQuestions();
     notifyListeners();
 
-    // XP Logika
+    // XP
     final (granted: gotXp, oldLevel: o, newLevel: n) = await UserRepository().tryGiveDiaryXp(userId, 20);
     return (gotXp, o, n);
   }

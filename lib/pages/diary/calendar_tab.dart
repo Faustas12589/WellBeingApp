@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 import '../../theme/app_theme.dart';
 import 'diary_provider.dart';
 import 'diary_dialogs.dart';
+import '../../services/language_notifier.dart';
 
 class CalendarTab extends StatelessWidget {
   const CalendarTab({super.key});
@@ -20,16 +22,19 @@ class CalendarTab extends StatelessWidget {
     });
   }
 
-  String _getMonthName(int m) => [
-    'Sausis', 'Vasaris', 'Kovas', 'Balandis', 'Gegužė', 'Birželis',
-    'Liepa', 'Rugpjūtis', 'Rugsėjis', 'Spalis', 'Lapkritis', 'Gruodis'
-  ][m - 1];
+  String _monthTitle(DateTime month, String locale) {
+    final name = DateFormat('LLLL', locale).format(month);
+    return '${name[0].toUpperCase()}${name.substring(1)} ${month.year}';
+  }
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     final provider = context.watch<DiaryProvider>();
-    final weekDays = ['Pr', 'An', 'Tr', 'Kt', 'Pn', 'Št', 'Sk'];
+    final lang = context.watch<LanguageNotifier>();
+    final weekDays = ['mon_short', 'tue_short', 'wed_short', 'thu_short', 'fri_short', 'sat_short', 'sun_short']
+        .map(lang.t)
+        .toList();
     final cells = _getDaysInMonth(provider.currentMonth);
 
     return Column(
@@ -47,7 +52,7 @@ class CalendarTab extends StatelessWidget {
                 ),
               ),
               Text(
-                '${_getMonthName(provider.currentMonth.month)} ${provider.currentMonth.year}',
+                _monthTitle(provider.currentMonth, lang.locale),
                 style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               IconButton(
@@ -121,7 +126,7 @@ class CalendarTab extends StatelessWidget {
                   DateTime(date.year, date.month, date.day)];
                   if (entries == null || entries.isEmpty) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Nėra įrašų")),
+                      SnackBar(content: Text(lang.t('no_entries_day'))),
                     );
                   } else if (entries.length == 1) {
                     DiaryDialogs.showEntryDialog(context, entries.first);
@@ -162,7 +167,7 @@ class CalendarTab extends StatelessWidget {
           child: ElevatedButton.icon(
             onPressed: () => DefaultTabController.of(context).animateTo(0),
             icon: const Icon(Icons.add),
-            label: const Text("Pridėti naują įrašą"),
+            label: Text(lang.t('diary_add_new_entry')),
             style: ElevatedButton.styleFrom(
               backgroundColor: colors.intenseColor,
               foregroundColor: Colors.black,

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import '../models/models.dart';
+import 'package:provider/provider.dart';
 import '../../../theme/app_theme.dart';
+import '../../../services/language_notifier.dart';
 
-final _customDaysCtrl = TextEditingController();
-bool _repeat = false;
 
 
 class GoalEditorDialog extends StatefulWidget {
@@ -23,6 +23,8 @@ class GoalEditorDialog extends StatefulWidget {
 class _GoalEditorDialogState extends State<GoalEditorDialog> {
   final _nameCtrl = TextEditingController();
   final _targetCtrl = TextEditingController();
+  final _customDaysCtrl = TextEditingController();
+  bool _repeat = false;
 
   String? _selectedHabitId;
   GoalPeriod _period = GoalPeriod.month;
@@ -39,37 +41,42 @@ class _GoalEditorDialogState extends State<GoalEditorDialog> {
       _selectedHabitId = g.habbitID;
       _period = g.period;
       _repeat = g.repeat;
+      if (g.period == GoalPeriod.custom) {
+        _customDaysCtrl.text = "${g.customDays ?? 1}";
+      }
     } else {
       _selectedHabitId = widget.habits.isNotEmpty ? widget.habits.first.id : null;
     }
+  }
 
-
-    if (g != null && g.period == GoalPeriod.custom) {
-      _customDaysCtrl.text = "${g.customDays ?? 1}";
-    }
-    _repeat = g?.repeat ?? false;
-
+  @override
+  void dispose() {
+    _nameCtrl.dispose();
+    _targetCtrl.dispose();
+    _customDaysCtrl.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     final editing = widget.initial != null;
+    final lang = context.watch<LanguageNotifier>();
 
     return AlertDialog(
-      title: Text(editing ? "Redaguoti tikslą" : "Naujas tikslas"),
+      title: Text(lang.t(editing ? 'edit_goal' : 'new_goal')),
       content: SingleChildScrollView(
         child: Column(
           children: [
             TextField(
               controller: _nameCtrl,
-              decoration: const InputDecoration(labelText: "Pavadinimas"),
+              decoration: InputDecoration(labelText: lang.t('title_label')),
             ),
             const SizedBox(height: 10),
 
             DropdownButtonFormField<String>(
               value: _selectedHabitId,
-              decoration: const InputDecoration(labelText: "Įprotis"),
+              decoration: InputDecoration(labelText: lang.t('habit_label')),
               items: widget.habits.map((h) {
                 return DropdownMenuItem(
                   value: h.id,
@@ -83,23 +90,23 @@ class _GoalEditorDialogState extends State<GoalEditorDialog> {
             TextField(
               controller: _targetCtrl,
               keyboardType: TextInputType.number,
-              decoration: const InputDecoration(labelText: "Tikslas (skaičius)"),
+              decoration: InputDecoration(labelText: lang.t('goal_number_label')),
             ),
             const SizedBox(height: 10),
 
             DropdownButtonFormField<GoalPeriod>(
               value: _period,
-              decoration: const InputDecoration(labelText: "Laikotarpis"),
+              decoration: InputDecoration(labelText: lang.t('period_label')),
               items: GoalPeriod.values.map((p) {
                 return DropdownMenuItem(
                   value: p,
                   child: Text(
                     switch (p) {
-                      GoalPeriod.day    => "Diena",
-                      GoalPeriod.week   => "Savaitė",
-                      GoalPeriod.month  => "Mėnuo",
-                      GoalPeriod.year   => "Metai",
-                      GoalPeriod.custom => "Custom (dienomis)",
+                      GoalPeriod.day    => lang.t('period_day'),
+                      GoalPeriod.week   => lang.t('period_week'),
+                      GoalPeriod.month  => lang.t('period_month'),
+                      GoalPeriod.year   => lang.t('period_year'),
+                      GoalPeriod.custom => lang.t('period_custom'),
                     },
                   ),
 
@@ -117,9 +124,9 @@ class _GoalEditorDialogState extends State<GoalEditorDialog> {
               TextField(
                 controller: _customDaysCtrl,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: "Laikotarpis (dienomis)",
-                  hintText: "pvz.: 10 (kas 10 dienų)",
+                decoration: InputDecoration(
+                  labelText: lang.t('custom_period_label'),
+                  hintText: lang.t('custom_period_hint'),
                 ),
               ),
             ]
@@ -129,7 +136,7 @@ class _GoalEditorDialogState extends State<GoalEditorDialog> {
       ),
 
       actions: [
-        TextButton(onPressed: () => Navigator.pop(context), child: Text("Atšaukti", style: TextStyle(color: colors.intenseColor))),
+        TextButton(onPressed: () => Navigator.pop(context), child: Text(lang.t('cancel'), style: TextStyle(color: colors.intenseColor))),
 
         TextButton(
           onPressed: () {
@@ -157,7 +164,7 @@ class _GoalEditorDialogState extends State<GoalEditorDialog> {
 
             Navigator.pop(context, goal);
           },
-          child: Text(editing ? "Išsaugoti" : "Pridėti", style: TextStyle(color: colors.intenseColor)),
+          child: Text(lang.t(editing ? 'save' : 'add'), style: TextStyle(color: colors.intenseColor)),
         )
       ],
     );

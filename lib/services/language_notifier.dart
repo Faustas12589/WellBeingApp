@@ -178,8 +178,6 @@ class LanguageNotifier extends ChangeNotifier {
     'category_hint': {AppLanguage.lt: 'Pvz.: Sporto progresas', AppLanguage.en: 'e.g.: Sports progress'},
     'category_already_exists': {AppLanguage.lt: 'Tokia kategorija jau egzistuoja!', AppLanguage.en: 'That category already exists!'},
     'delete_category_confirm': {AppLanguage.lt: 'Ištrinti kategoriją?', AppLanguage.en: 'Delete category?'},
-    'delete_category_text': {AppLanguage.lt: "Ar tikrai norite ištrinti aplankalą '{category}'? Nesijaudinkite, nuotraukos nebus ištrintos.", AppLanguage.en: "Are you sure you want to delete the folder '{category}'? Don't worry — photos are preserved."},
-    'category_deleted': {AppLanguage.lt: "Kategorija '{category}' ištrinta!", AppLanguage.en: "Category '{category}' deleted!"},
 
     'failed_open_camera_gallery': {AppLanguage.lt: 'Nepavyko atidaryti kameros/galerijos: {error}', AppLanguage.en: 'Failed to open camera/gallery: {error}'},
     'questions_unavailable': {AppLanguage.lt: 'Atsiprašome, klausimai nėra prieinami', AppLanguage.en: 'Sorry, questions are not available'},
@@ -244,10 +242,10 @@ class LanguageNotifier extends ChangeNotifier {
     'diary_m': {AppLanguage.lt: 'Kaip jautiesi šiandien?', AppLanguage.en: 'How do you feel today?'},
     'diary_diary_entry': {AppLanguage.lt: 'Laisvas dienoraštis', AppLanguage.en: 'Diary entry'},
     'write_here': {AppLanguage.lt: 'Rašyk čia...', AppLanguage.en: 'Write here...'},
-    'diary_add_photo': {AppLanguage.lt: 'Pridėti nuotrauką(neprivaloma)', AppLanguage.en: 'Add photo(optional)'},
+    'diary_add_photo': {AppLanguage.lt: 'Prisegti nuotrauką (neprivaloma)', AppLanguage.en: 'Attach a photo (optional)'},
     'save_entry': {AppLanguage.lt: 'Išsaugoti įrašą', AppLanguage.en: 'Save entry'},
     'entry_saved': {AppLanguage.lt: 'Įrašas išsaugotas!', AppLanguage.en: 'Entry saved!'},
-    'diary_press_to_add': {AppLanguage.lt: 'Paspauskite, kad pridėtumėte', AppLanguage.en: 'Press to add'},
+    'diary_press_to_add': {AppLanguage.lt: 'Paspauskite, kad pridėtumėte', AppLanguage.en: 'Tap to add'},
     'pick_gallery': {AppLanguage.lt: 'Galerija', AppLanguage.en: 'Gallery'},
     'take_photo': {AppLanguage.lt: 'Kamera', AppLanguage.en: 'Camera'},
     'pick_mood': {AppLanguage.lt: 'Pasirink nuotaiką', AppLanguage.en: 'Select mood'},
@@ -273,10 +271,70 @@ class LanguageNotifier extends ChangeNotifier {
     'close': {AppLanguage.lt: 'Uždaryti', AppLanguage.en: 'Close'},
     'no_entries_day': {AppLanguage.lt: 'Nėra įrašų šiai dienai', AppLanguage.en: 'No entries for this day'},
     'diary_add_new_entry': {AppLanguage.lt: 'Pridėti naują įrašą', AppLanguage.en: 'Add new entry'},
-    //'save_entry': {AppLanguage.lt: 'Išsaugoti įrašą', AppLanguage.en: 'Save entry'},
 
+    // Diary dialogs
+    'later': {AppLanguage.lt: 'Vėliau', AppLanguage.en: 'Later'},
+    'get_premium': {AppLanguage.lt: 'Gauti Premium', AppLanguage.en: 'Get Premium'},
+    'premium_category_limit': {AppLanguage.lt: 'Nemokama versija leidžia turėti tik 1 kategoriją. Gauk Premium ir turėk neribotai!', AppLanguage.en: 'The free version allows only 1 category. Get Premium for unlimited categories!'},
+    'delete_category_text': {AppLanguage.lt: "Ar tikrai norite ištrinti aplankalą '{category}'?\n\nNuotraukos nebus ištrintos, jos atsiras skiltyje 'Visos'.", AppLanguage.en: "Are you sure you want to delete the folder '{category}'?\n\nThe photos won't be deleted, they will stay under 'All'."},
+    'category_deleted': {AppLanguage.lt: "Kategorija '{category}' ištrinta!", AppLanguage.en: "Category '{category}' deleted!"},
+    'pick_from_gallery': {AppLanguage.lt: 'Pasirinkti iš galerijos', AppLanguage.en: 'Choose from gallery'},
+    'take_new_photo': {AppLanguage.lt: 'Daryti naują nuotrauką', AppLanguage.en: 'Take a new photo'},
+    'default_category_weight': {AppLanguage.lt: 'Svorio metimas', AppLanguage.en: 'Weight loss'},
+    'default_category_skin': {AppLanguage.lt: 'Odos būklė', AppLanguage.en: 'Skin condition'},
+    'default_category_room': {AppLanguage.lt: 'Kambario tvarka', AppLanguage.en: 'Room tidiness'},
+    'default_category_creativity': {AppLanguage.lt: 'Kūryba', AppLanguage.en: 'Creativity'},
+
+    // Login
+    'sign_in_google': {AppLanguage.lt: 'Prisijungti su Google', AppLanguage.en: 'Sign in with Google'},
+    'sign_in_failed': {AppLanguage.lt: 'Prisijungti nepavyko: {error}', AppLanguage.en: 'Sign in failed: {error}'},
+
+    // Questionnaire
+    'questionnaire_title': {AppLanguage.lt: 'Klausimynas', AppLanguage.en: 'Questionnaire'},
+    'q_what_improve': {AppLanguage.lt: 'Ką nori pagerinti?', AppLanguage.en: 'What do you want to improve?'},
+    'q_fitness': {AppLanguage.lt: 'Sportas', AppLanguage.en: 'Fitness'},
+    'q_sleep': {AppLanguage.lt: 'Miegas', AppLanguage.en: 'Sleep'},
+    'q_productivity': {AppLanguage.lt: 'Produktyvumas', AppLanguage.en: 'Productivity'},
+    'q_pick_sport': {AppLanguage.lt: 'Pasirink sporto tipą:', AppLanguage.en: 'Choose a type of exercise:'},
+    'q_running': {AppLanguage.lt: 'Bėgimas', AppLanguage.en: 'Running'},
+    'q_gym': {AppLanguage.lt: 'Sporto salė', AppLanguage.en: 'Gym'},
+    'q_walking': {AppLanguage.lt: 'Vaikščiojimas', AppLanguage.en: 'Walking'},
+    'q_running_km': {AppLanguage.lt: 'Kiek km per savaitę?', AppLanguage.en: 'How many km per week?'},
+    'q_gym_days': {AppLanguage.lt: 'Kiek kartų per savaitę?', AppLanguage.en: 'How many times per week?'},
+    'q_walking_steps': {AppLanguage.lt: 'Kiek žingsnių per dieną?', AppLanguage.en: 'How many steps per day?'},
+    'q_sleep_hours': {AppLanguage.lt: 'Kiek valandų miego per parą?', AppLanguage.en: 'How many hours of sleep per night?'},
+    'q_productivity_hours': {AppLanguage.lt: 'Kiek valandų produktyvumo per dieną?', AppLanguage.en: 'How many productive hours per day?'},
+    'q_submit': {AppLanguage.lt: 'Išsaugoti ir sukurti tikslus', AppLanguage.en: 'Save and create goals'},
+    'q_goals_saved': {AppLanguage.lt: 'Tikslai išsaugoti!', AppLanguage.en: 'Goals saved!'},
+    'q_goal_running': {AppLanguage.lt: 'Bėgti {n} km per savaitę', AppLanguage.en: 'Run {n} km per week'},
+    'q_goal_gym': {AppLanguage.lt: 'Eiti į salę {n} kartus/sav.', AppLanguage.en: 'Go to the gym {n} times/week'},
+    'q_goal_walking': {AppLanguage.lt: 'Nueiti {n} žingsnių per dieną', AppLanguage.en: 'Walk {n} steps per day'},
+    'q_goal_sleep': {AppLanguage.lt: 'Miegoti {n} valandas', AppLanguage.en: 'Sleep {n} hours'},
+    'q_goal_productivity': {AppLanguage.lt: 'Dirbti {n} valandas', AppLanguage.en: 'Work {n} hours'},
   };
 
+  /// Translation with `{name}` placeholders filled in, e.g.
+  /// `tp('n_selected', {'count': 3})`.
+  String tp(String key, Map<String, Object> params) {
+    var text = t(key);
+    params.forEach((name, value) => text = text.replaceAll('{$name}', '$value'));
+    return text;
+  }
 
+  /// Diary moods are stored in Lithuanian (see DiaryProvider.moods).
+  /// This returns the label for the current language.
+  String moodLabel(String storedMood) {
+    const keys = {
+      'Puikiai': 'diary_mood_great',
+      'Gerai': 'diary_mood_good',
+      'Normaliai': 'diary_mood_normal',
+      'Prastai': 'diary_mood_poor',
+      'Blogai': 'diary_mood_bad',
+    };
+    for (final entry in keys.entries) {
+      if (storedMood.contains(entry.key)) return t(entry.value);
+    }
+    return storedMood;
+  }
 }
 

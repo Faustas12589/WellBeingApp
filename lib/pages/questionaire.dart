@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:provider/provider.dart';
 
 import '../features/habits/models/habit.dart';
 import '../features/habits/models/goalsModel.dart';
 import '../features/habits/models/ratingKind.dart';
+import '../services/language_notifier.dart';
 
 class QuestionnaireScreen extends StatefulWidget {
   const QuestionnaireScreen({super.key});
@@ -29,7 +31,7 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
   final sleepHoursController = TextEditingController();
   final productivityHoursController = TextEditingController();
 
-  // 🔥 UNIVERSALI FUNKCIJA (be copy-paste)
+  // Creates a habit and a matching goal that points to it
   Future<void> _createHabitWithGoal({
     required String userId,
     required String habitName,
@@ -42,7 +44,7 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
   }) async {
     final db = FirebaseFirestore.instance;
 
-    // 🔥 Firestore sugeneruoja ID
+    // Firestore generates the ID
     final habitRef = db
         .collection('users')
         .doc(userId)
@@ -59,7 +61,7 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
 
     await habitRef.set(habit.toJson());
 
-    // 🔥 Goal su tuo pačiu habit ID
+    // Goal linked to the same habit ID
     final goalRef = db
         .collection('users')
         .doc(userId)
@@ -78,76 +80,80 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
     await goalRef.set(goal.toJson());
   }
 
-  // 🔥 MAIN SAVE LOGIC
-  Future<void> saveToFirebase() async {
+  // Save every selected answer as a habit + goal.
+  // Habit and goal names are created in the user's current language.
+  Future<void> saveToFirebase(LanguageNotifier lang) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
 
     final userId = user.uid;
 
-    // RUNNING
-    if (running && runningKmController.text.isNotEmpty) {
+    // Ignore empty or non-numeric answers instead of crashing.
+    int? read(TextEditingController c) => int.tryParse(c.text.trim());
+
+    final runningKm = read(runningKmController);
+    if (fitness && running && runningKm != null) {
       await _createHabitWithGoal(
         userId: userId,
-        habitName: "Bėgimas",
+        habitName: lang.t('q_running'),
         kind: RatingKind.number,
-        target: int.parse(runningKmController.text),
+        target: runningKm,
         period: GoalPeriod.week,
-        goalName: "Bėgti ${runningKmController.text} km per savaitę",
+        goalName: lang.tp('q_goal_running', {'n': runningKm}),
         min: 0,
         max: 200,
       );
     }
 
-    // GYM
-    if (gym && gymDaysController.text.isNotEmpty) {
+    final gymDays = read(gymDaysController);
+    if (fitness && gym && gymDays != null) {
       await _createHabitWithGoal(
         userId: userId,
-        habitName: "Sporto salė",
+        habitName: lang.t('q_gym'),
         kind: RatingKind.checkbox,
-        target: int.parse(gymDaysController.text),
+        target: gymDays,
         period: GoalPeriod.week,
-        goalName: "Eiti į salę ${gymDaysController.text} kartus/sav.",
+        goalName: lang.tp('q_goal_gym', {'n': gymDays}),
       );
     }
 
-    // WALKING
-    if (walking && walkingStepsController.text.isNotEmpty) {
+    final walkingSteps = read(walkingStepsController);
+    if (fitness && walking && walkingSteps != null) {
       await _createHabitWithGoal(
         userId: userId,
-        habitName: "Vaikščiojimas",
+        habitName: lang.t('q_walking'),
         kind: RatingKind.number,
-        target: int.parse(walkingStepsController.text),
+        target: walkingSteps,
         period: GoalPeriod.day,
-        goalName: "Nueiti ${walkingStepsController.text} žingsnių per dieną",
+        goalName: lang.tp('q_goal_walking', {'n': walkingSteps}),
         min: 0,
         max: 50000,
       );
     }
 
-    // SLEEP
-    if (sleep && sleepHoursController.text.isNotEmpty) {
+    final sleepHours = read(sleepHoursController);
+    if (sleep && sleepHours != null) {
       await _createHabitWithGoal(
         userId: userId,
-        habitName: "Miegas",
+        habitName: lang.t('q_sleep'),
         kind: RatingKind.number,
-        target: int.parse(sleepHoursController.text),
+        target: sleepHours,
         period: GoalPeriod.day,
-        goalName: "Miegoti ${sleepHoursController.text} valandas",
+        goalName: lang.tp('q_goal_sleep', {'n': sleepHours}),
         min: 0,
         max: 24,
       );
     }
 
-    // PRODUCTIVITY
-    if (productivity && productivityHoursController.text.isNotEmpty) {
+    final productivityHours = read(productivityHoursController);
+    if (productivity && productivityHours != null) {
       await _createHabitWithGoal(
         userId: userId,
-        habitName: "Produktyvumas",
+        habitName: lang.t('q_productivity'),
         kind: RatingKind.number,
-        target: int.parse(productivityHoursController.text),
+        target: productivityHours,
         period: GoalPeriod.day,
-        goalName: "Dirbti ${productivityHoursController.text} valandas",
+        goalName: lang.tp('q_goal_productivity', {'n': productivityHours}),
         min: 0,
         max: 24,
       );
@@ -155,13 +161,25 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
   }
 
   void submit() async {
-    await saveToFirebase();
+    final lang = context.read<LanguageNotifier>();
+    await saveToFirebase(lang);
+    if (!mounted) return;
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Goals išsaugoti!")),
+      SnackBar(content: Text(lang.t('q_goals_saved'))),
     );
 
     Navigator.pop(context);
+  }
+
+  @override
+  void dispose() {
+    runningKmController.dispose();
+    gymDaysController.dispose();
+    walkingStepsController.dispose();
+    sleepHoursController.dispose();
+    productivityHoursController.dispose();
+    super.dispose();
   }
 
   Widget numberInput(String label, TextEditingController controller) {
@@ -180,9 +198,11 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final lang = context.watch<LanguageNotifier>();
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Klausimynas'),
+        title: Text(lang.t('questionnaire_title')),
         backgroundColor: Colors.yellow,
         foregroundColor: Colors.black,
         centerTitle: true,
@@ -193,25 +213,25 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
 
-            const Text(
-              "Ką nori pagerinti?",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            Text(
+              lang.t('q_what_improve'),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
 
             CheckboxListTile(
-              title: const Text("Sportas"),
+              title: Text(lang.t('q_fitness')),
               value: fitness,
               onChanged: (val) => setState(() => fitness = val!),
             ),
 
             CheckboxListTile(
-              title: const Text("Miegas"),
+              title: Text(lang.t('q_sleep')),
               value: sleep,
               onChanged: (val) => setState(() => sleep = val!),
             ),
 
             CheckboxListTile(
-              title: const Text("Produktyvumas"),
+              title: Text(lang.t('q_productivity')),
               value: productivity,
               onChanged: (val) => setState(() => productivity = val!),
             ),
@@ -219,38 +239,38 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
             const SizedBox(height: 20),
 
             if (fitness) ...[
-              const Text("Pasirink sporto tipą:", style: TextStyle(fontWeight: FontWeight.bold)),
+              Text(lang.t('q_pick_sport'), style: const TextStyle(fontWeight: FontWeight.bold)),
 
               CheckboxListTile(
-                title: const Text("Bėgimas"),
+                title: Text(lang.t('q_running')),
                 value: running,
                 onChanged: (val) => setState(() => running = val!),
               ),
               if (running)
-                numberInput("Kiek km per savaitę?", runningKmController),
+                numberInput(lang.t('q_running_km'), runningKmController),
 
               CheckboxListTile(
-                title: const Text("Sporto salė"),
+                title: Text(lang.t('q_gym')),
                 value: gym,
                 onChanged: (val) => setState(() => gym = val!),
               ),
               if (gym)
-                numberInput("Kiek kartų per savaitę?", gymDaysController),
+                numberInput(lang.t('q_gym_days'), gymDaysController),
 
               CheckboxListTile(
-                title: const Text("Vaikščiojimas"),
+                title: Text(lang.t('q_walking')),
                 value: walking,
                 onChanged: (val) => setState(() => walking = val!),
               ),
               if (walking)
-                numberInput("Kiek žingsnių per dieną?", walkingStepsController),
+                numberInput(lang.t('q_walking_steps'), walkingStepsController),
             ],
 
             if (sleep)
-              numberInput("Kiek valandų miego per parą?", sleepHoursController),
+              numberInput(lang.t('q_sleep_hours'), sleepHoursController),
 
             if (productivity)
-              numberInput("Kiek valandų produktyvumo per dieną?", productivityHoursController),
+              numberInput(lang.t('q_productivity_hours'), productivityHoursController),
 
             const SizedBox(height: 30),
 
@@ -258,7 +278,7 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: submit,
-                child: const Text("Išsaugoti ir generuoti goals"),
+                child: Text(lang.t('q_submit')),
               ),
             ),
           ],

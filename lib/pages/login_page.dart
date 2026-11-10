@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
+import '../services/language_notifier.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -18,7 +20,7 @@ class _LoginPageState extends State<LoginPage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Sign in failed: $e')),
+          SnackBar(content: Text(context.read<LanguageNotifier>().tp('sign_in_failed', {'error': e}))),
         );
       }
     } finally {
@@ -35,7 +37,7 @@ class _LoginPageState extends State<LoginPage> {
             : ElevatedButton.icon(
           onPressed: _signIn,
           icon: const Icon(Icons.login),
-          label: const Text('Sign in with Google'),
+          label: Text(context.watch<LanguageNotifier>().t('sign_in_google')),
         ),
       ),
     );
